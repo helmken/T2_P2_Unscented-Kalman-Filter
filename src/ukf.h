@@ -115,25 +115,6 @@ private:
      */
     void Initialize(const MeasurementPackage &measurement_pack);
 
-    /**
-     * Prediction Predicts sigma points, the state, and the state covariance
-     * matrix
-     * @param delta_t Time between k and k+1 in s
-     */
-    void Prediction(double delta_t);
-
-    /**
-     * Updates the state and the state covariance matrix using a laser measurement
-     * @param meas_package The measurement at k+1
-     */
-    void UpdateLidar(MeasurementPackage meas_package);
-
-    /**
-     * Updates the state and the state covariance matrix using a radar measurement
-     * @param meas_package The measurement at k+1
-     */
-    void UpdateRadar(MeasurementPackage meas_package);
-
     void PredictMeanAndCovariance(
         const MatrixXd& predictedSigmaPoints, VectorXd& x_pred, MatrixXd& P_pred);
 

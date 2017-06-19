@@ -65,9 +65,9 @@ void UKF::Initialize(const MeasurementPackage &measurement_pack)
     *  Initialization
     ****************************************************************************/
 
-    // TODO: 1) Initialize the state x_ with the first measurement.
-    // TODO: 2) Create the covariance matrix.
-    //			Remember: you'll need to convert radar from polar to cartesian coordinates.
+    // 1) Initialize the state x_ with the first measurement.
+    // 2) Create the covariance matrix, remember: you'll need to convert radar 
+    //    from polar to cartesian coordinates.
 
     // first measurement
     x_.fill(1.0);
@@ -115,7 +115,6 @@ void UKF::Initialize(const MeasurementPackage &measurement_pack)
  */
 void UKF::ProcessMeasurement(MeasurementPackage meas_package)
 {
-    // Make sure you switch between lidar and radar measurements.
     if (!is_initialized_)
     {
         Initialize(meas_package);
@@ -123,7 +122,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
     }
 
     /*****************************************************************************
-    *  Prediction
+    * Prediction: predict sigma points, the state, and the state covariance matrix
     ****************************************************************************/
     //cout << "timestamp: " << measurement_pack.timestamp_ << endl;
 
@@ -148,8 +147,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
     *  Update
     ****************************************************************************/
 
-    // TODO: Use the sensor type to perform the update step.
-    //       Update the state and covariance matrices.
+    // Use the sensor type to perform the update step, update the state and covariance 
+    // matrices.
 
     if (   MeasurementPackage::RADAR == meas_package.sensor_type_
         && use_radar_)
@@ -164,7 +163,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
         MatrixXd predSigmaPointsInMeasSpace; // predicted sigma points in measurement space
         VectorXd z_pred; // predicted measurement mean
         MatrixXd S_pred; // predicted measurement variance
-
         PredictRadarMeasurement(
             predictedSigmaPoints, predSigmaPointsInMeasSpace, 
             z_pred, S_pred);
@@ -214,39 +212,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
 
     //cout << "x_ = " << ekf_.x_ << endl;
     //cout << "P_ = " << ekf_.P_ << endl;
-}
-
-/**
- * Predicts sigma points, the state, and the state covariance matrix.
- * @param {double} delta_t the change in time (in seconds) between the last
- * measurement and this one.
- */
-void UKF::Prediction(double delta_t)
-{
-    // TODO: Complete this function! Estimate the object's location. Modify the state
-    // vector, x_. Predict sigma points, the state, and the state covariance matrix.
-}
-
-/**
- * Updates the state and the state covariance matrix using a laser measurement.
- * @param {MeasurementPackage} meas_package
- */
-void UKF::UpdateLidar(MeasurementPackage meas_package)
-{
-    // TODO: Complete this function! Use lidar data to update the belief about the object's
-    // position. Modify the state vector, x_, and covariance, P_.
-    // You'll also need to calculate the lidar NIS.
-}
-
-/**
- * Updates the state and the state covariance matrix using a radar measurement.
- * @param {MeasurementPackage} meas_package
- */
-void UKF::UpdateRadar(MeasurementPackage meas_package)
-{
-    // TODO: Complete this function! Use radar data to update the belief about the object's
-    // position. Modify the state vector, x_, and covariance, P_.
-    // You'll also need to calculate the radar NIS.
 }
 
 MatrixXd GenerateAugmentedSigmaPoints(const VectorXd& x, const MatrixXd& P)
@@ -466,8 +431,8 @@ void UKF::UpdateStateRadar(
     VectorXd& z,
     VectorXd& x_updated, MatrixXd& P_updated)
 {
-    // TODO: Complete this function! Use radar data to update the belief about the object's
-    // position. Modify the state vector x_, and covariance P_.
+    // Use radar data to update the belief about the object's position. 
+    // Modify the state vector x_, and covariance P_.
     // TODO: You'll also need to calculate the radar NIS.
 
     //calculate cross correlation matrix Tc
