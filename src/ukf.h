@@ -31,11 +31,11 @@ const int laserMeas_dim(2);
 
 // Process noise standard deviation longitudinal acceleration in m/s^2
 // TODO: adjust noise standard deviation longitudinal acceleration to a value for bicycles
-const double std_a(0.2); //(4.0); //(0.2); // (30);
+const double std_a(1.75);
 
 // Process noise standard deviation yaw acceleration in rad/s^2
 // TODO: adjust noise standard deviation yaw acceleration to a value for bicycles
-const double std_yaw_dot(0.2); // (4.0); // (0.2); // (30);
+const double std_yaw_dot(0.9);
 
 // Laser measurement noise standard deviation position1 in m
 const double std_laser_px(0.15);
@@ -51,6 +51,12 @@ const double std_radar_phi(0.03);   // value from lesson: 0.0175
 
 // Radar measurement noise standard deviation radius change in m/s
 const double std_radar_rhodot(0.3); // value from lesson: 0.1
+
+// radar measurements are 3D, so NIS consistency threshold is 7.815
+const double radar_nis_threshold(7.815);
+
+// laser measurements are 2D, so NIS consistency threshold is 5.991
+const double laser_nis_threshold(5.991);
 
 
 class UKF
@@ -87,6 +93,10 @@ private:
     // Weights of sigma points
     VectorXd weights_;
 
+    // track calculated NIS values for laser and radar
+    std::vector<double> laserNisValues_;
+    std::vector<double> radarNisValues_;
+
 public:
     /**
      * Constructor
@@ -108,6 +118,12 @@ public:
     {
         return x_;
     };
+
+    /**
+     * calculate the percentage of NIS values for laser and radar that are
+     * higher than 7.8
+     */
+    void CalculateNisConsistency();
 
 private:
     /**
@@ -150,5 +166,7 @@ MatrixXd CalculatePredictedSigmaPoints(const MatrixXd& augmentedSigmaPoints, con
 double CalculateRadarNIS(const VectorXd& z, const VectorXd& z_pred, const MatrixXd& S_pred);
 
 double CalculateLaserNIS(const VectorXd& z, const VectorXd& z_pred, const MatrixXd& S_pred);
+
+double CalculateNisConsistencyFromMeasurements(const double nisThreshold, const std::vector<double>& nisValues);
 
 #endif /* UKF_H */

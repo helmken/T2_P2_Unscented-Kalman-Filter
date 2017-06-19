@@ -175,7 +175,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
             predSigmaPointsInMeasSpace, z_pred, S_pred,
             z, x_, P_);
 
-        CalculateRadarNIS(z, z_pred, S_pred);
+        radarNisValues_.push_back(CalculateRadarNIS(z, z_pred, S_pred));
+        CalculateNisConsistencyFromMeasurements(radar_nis_threshold, radarNisValues_);
 
         previous_timestamp_ = meas_package.timestamp_;
     }
@@ -205,7 +206,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
             predSigmaPointsInMeasSpace, z_pred, S_pred,
             z, x_, P_);
 
-        CalculateLaserNIS(z, z_pred, S_pred);
+        laserNisValues_.push_back(CalculateLaserNIS(z, z_pred, S_pred));
+        CalculateNisConsistencyFromMeasurements(laser_nis_threshold, laserNisValues_);
 
         previous_timestamp_ = meas_package.timestamp_;
     }
@@ -581,3 +583,37 @@ double CalculateLaserNIS(const VectorXd& z, const VectorXd& z_pred, const Matrix
     printf("laser NIS:\t %02.5f\n", nis);
     return nis;
 }
+
+void UKF::CalculateNisConsistency()
+{
+    printf("radar NIS:\n");
+    CalculateNisConsistencyFromMeasurements(radar_nis_threshold, radarNisValues_);
+
+    printf("laser NIS:\n");
+    CalculateNisConsistencyFromMeasurements(laser_nis_threshold, laserNisValues_);
+}
+
+double CalculateNisConsistencyFromMeasurements(const double nisThreshold, const std::vector<double>& nisValues)
+{
+    if (0 == nisValues.size())
+    {
+        printf("given nisValues are empty -> no calculation possible");
+        return 0.0;
+    }
+
+    int aboveThreshold(0);
+    for (const double& nisValue : nisValues)
+    {
+        if (nisValue > nisThreshold)
+        {
+            ++aboveThreshold;
+        }
+    }
+    const double fraction = (double)aboveThreshold / (double)nisValues.size();
+
+    printf("CalculateNisConsistency: %i of %lu measurements are above %.3f -> fraction=%.3f\n",
+        aboveThreshold, nisValues.size(), nisThreshold, fraction);
+
+    return fraction;
+}
+

@@ -395,6 +395,8 @@ int main_forDataFile(int argc, char* argv[])
         in_file_.close();
     }
 
+    ukf.CalculateNisConsistency();
+
     return 0;
 }
 
