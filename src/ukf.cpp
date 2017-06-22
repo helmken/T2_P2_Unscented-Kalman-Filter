@@ -31,13 +31,8 @@ UKF::UKF()
     weights_ = VectorXd(num_sigma_points);
 
     // set weights
-    const double weight_0 = lambda / (lambda + x_aug_dim);
-    const double weight_i = 0.5 / (lambda + x_aug_dim);
-    weights_(0) = weight_0;
-    for (int i = 1; i < num_sigma_points; ++i)
-    {
-        weights_(i) = weight_i;
-    }
+    weights_.fill(0.5 / (lambda + x_aug_dim));
+    weights_(0) = lambda / (lambda + x_aug_dim);
 
     // measurement noise covariance for radar measurements
     R_radar_ = MatrixXd(radarMeas_dim, radarMeas_dim);
@@ -130,6 +125,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
     if (fabs(dt) < std::numeric_limits<double>::epsilon())
     {
         printf("***\n*** dt is zero -> no prediction necessary ***\n***\n");
+        return;
     }
 
     printf("\n*** measurement %03i, dt=%.5f ***\n", measurement_count_, dt);

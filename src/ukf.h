@@ -36,6 +36,10 @@ const double std_a(1.75);
 // Process noise standard deviation yaw acceleration in rad/s^2
 // TODO: adjust noise standard deviation yaw acceleration to a value for bicycles
 const double std_yaw_dot(0.9);
+// Please, tweak these two values to obtain the required RMSE values.Another way could 
+// be to look at the "obj_pose-laser-radar-synthetic-input.txt" dataset and try to 
+// estimate the standard deviations for both accelerations.
+
 
 // Laser measurement noise standard deviation position1 in m
 const double std_laser_px(0.15);

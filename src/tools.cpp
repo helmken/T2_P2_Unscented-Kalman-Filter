@@ -78,25 +78,31 @@ Eigen::VectorXd Polar2Cartesian(
     return result;
 }
 
-double NormalizeAngle(double radian)
+
+double NormalizeAngle(double  phi)
 {
-    if (radian >= -M_PI && radian <= M_PI)
-    {
-        return radian;
-    }
-
-    double normalized(radian);
-    while (normalized > M_PI)
-    {
-        normalized -= 2 * M_PI;
-    }
-
-    while (normalized < -M_PI)
-    {
-        normalized += 2 * M_PI;
-    }
-
-    //printf("normalizing angle %.5f to %.5f\n", radian * rad2deg, normalized * rad2deg);
-    
-    return normalized;
+    return atan2(sin(phi), cos(phi));
 }
+
+//double NormalizeAngle(double radian)
+//{
+//    if (radian >= -M_PI && radian <= M_PI)
+//    {
+//        return radian;
+//    }
+//
+//    double normalized(radian);
+//    while (normalized > M_PI)
+//    {
+//        normalized -= 2 * M_PI;
+//    }
+//
+//    while (normalized < -M_PI)
+//    {
+//        normalized += 2 * M_PI;
+//    }
+//
+//    //printf("normalizing angle %.5f to %.5f\n", radian * rad2deg, normalized * rad2deg);
+//    
+//    return normalized;
+//}
