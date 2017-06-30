@@ -128,7 +128,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
         return;
     }
 
-    printf("\n*** measurement %03i, dt=%.5f ***\n", measurement_count_, dt);
+    //printf("\n*** measurement %03i, dt=%.5f ***\n", measurement_count_, dt);
     ++measurement_count_;
 
     MatrixXd augmentedSigmaPoints = GenerateAugmentedSigmaPoints(x_, P_);
@@ -153,8 +153,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
         z[0] = meas_package.raw_measurements_[0];   // rho
         z[1] = NormalizeAngle(meas_package.raw_measurements_[1]);   // phi
         z[2] = meas_package.raw_measurements_[2];   // rho_dot
-        printf("radar measurement\nz:\t\t %03.5f, phi=%03.5f, %03.5f\n",
-            z[0], z[1] * 180.0 / M_PI, z[2]);
+        //printf("radar measurement\nz:\t\t %03.5f, phi=%03.5f, %03.5f\n",
+        //    z[0], z[1] * 180.0 / M_PI, z[2]);
 
         MatrixXd predSigmaPointsInMeasSpace; // predicted sigma points in measurement space
         VectorXd z_pred; // predicted measurement mean
@@ -163,8 +163,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
             predictedSigmaPoints, predSigmaPointsInMeasSpace, 
             z_pred, S_pred);
 
-        printf("x_pred:\t\t x=%03.5f, y=%03.5f, v=%03.5f, yaw=%03.5f, yaw rate=%03.5f\n",
-            x_pred[0], x_pred[1], x_pred[2], x_pred[3] * rad2deg, x_pred[4] * rad2deg);
+        //printf("x_pred:\t\t x=%03.5f, y=%03.5f, v=%03.5f, yaw=%03.5f, yaw rate=%03.5f\n",
+        //    x_pred[0], x_pred[1], x_pred[2], x_pred[3] * rad2deg, x_pred[4] * rad2deg);
 
         UpdateStateRadar(
             predictedSigmaPoints, x_pred, P_pred,
@@ -183,8 +183,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
         z[0] = meas_package.raw_measurements_[0]; // p_x
         z[1] = meas_package.raw_measurements_[1]; // p_y 
 
-        printf("laser measurement\nz:\t\t x=%03.5f, y=%03.5f\n",
-            z[0], z[1]);
+        //printf("laser measurement\nz:\t\t x=%03.5f, y=%03.5f\n",
+        //    z[0], z[1]);
 
         MatrixXd predSigmaPointsInMeasSpace; // predicted sigma points in measurement space
         VectorXd z_pred; // predicted measurement mean
@@ -194,8 +194,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
             predictedSigmaPoints, predSigmaPointsInMeasSpace,
             z_pred, S_pred);
 
-        printf("x_pred:\t\t x=%03.5f, y=%03.5f, v=%03.5f, yaw=%03.5f, yaw rate=%03.5f\n",
-            x_pred[0], x_pred[1], x_pred[2], x_pred[3] * rad2deg, x_pred[4] * rad2deg);
+        //printf("x_pred:\t\t x=%03.5f, y=%03.5f, v=%03.5f, yaw=%03.5f, yaw rate=%03.5f\n",
+        //    x_pred[0], x_pred[1], x_pred[2], x_pred[3] * rad2deg, x_pred[4] * rad2deg);
 
         UpdateStateLaser(
             predictedSigmaPoints, x_pred, P_pred,
@@ -399,8 +399,8 @@ void UKF::PredictRadarMeasurement(
     // normalize angle phi
     z_pred[1] = NormalizeAngle(z_pred[1]);
 
-    printf("z_pred:\t\t %03.5f, phi=%03.5f, %03.5f\n",
-        z_pred[0], z_pred[1] * 180.0 / M_PI, z_pred[2]);
+    //printf("z_pred:\t\t %03.5f, phi=%03.5f, %03.5f\n",
+    //    z_pred[0], z_pred[1] * 180.0 / M_PI, z_pred[2]);
 
     //measurement covariance matrix S
     S_pred = MatrixXd(radarMeas_dim, radarMeas_dim);
@@ -462,8 +462,8 @@ void UKF::UpdateStateRadar(
 
     P_updated = P_pred - K * S_pred * (K.transpose());
 
-    printf("x_updated:\t x=%03.5f, y=%03.5f, v=%03.5f, yaw=%03.5f, yaw rate=%03.5f\n",
-        x_updated[0], x_updated[1], x_updated[2], x_updated[3] * rad2deg, x_updated[4] * rad2deg);
+    //printf("x_updated:\t x=%03.5f, y=%03.5f, v=%03.5f, yaw=%03.5f, yaw rate=%03.5f\n",
+    //    x_updated[0], x_updated[1], x_updated[2], x_updated[3] * rad2deg, x_updated[4] * rad2deg);
     
     // std::cout << "P_updated:\n" << P_updated << std::endl;
 }
@@ -502,8 +502,8 @@ void UKF::PredictLaserMeasurement(
         z_pred = z_pred + weights_[i] * predSigmaPointsInMeasSpace.col(i);
     }
 
-    printf("z_pred:\t\t %03.5f, %03.5f\n",
-        z_pred[0], z_pred[1]);
+    //printf("z_pred:\t\t %03.5f, %03.5f\n",
+    //    z_pred[0], z_pred[1]);
 
     //measurement covariance matrix S
     S_pred = MatrixXd(laserMeas_dim, laserMeas_dim);
@@ -556,8 +556,8 @@ void UKF::UpdateStateLaser(
 
     P_updated = P_pred - K * S_pred * (K.transpose());
 
-    printf("x_updated:\t x=%03.5f, y=%03.5f, v=%03.5f, yaw=%03.5f, yaw rate=%03.5f\n",
-        x_updated[0], x_updated[1], x_updated[2], x_updated[3] * rad2deg, x_updated[4] * rad2deg);
+    //printf("x_updated:\t x=%03.5f, y=%03.5f, v=%03.5f, yaw=%03.5f, yaw rate=%03.5f\n",
+    //    x_updated[0], x_updated[1], x_updated[2], x_updated[3] * rad2deg, x_updated[4] * rad2deg);
 
     // std::cout << "P_updated:\n" << P_updated << std::endl;
 }
@@ -567,7 +567,7 @@ double CalculateRadarNIS(const VectorXd& z, const VectorXd& z_pred, const Matrix
     VectorXd zDiff = z - z_pred;
     double nis = zDiff.transpose() * S_pred.inverse() * zDiff;
     
-    printf("radar NIS:\t %02.5f\n", nis);
+//    printf("radar NIS:\t %02.5f\n", nis);
     return nis;
 }
 
@@ -576,16 +576,16 @@ double CalculateLaserNIS(const VectorXd& z, const VectorXd& z_pred, const Matrix
     VectorXd zDiff = z - z_pred;
     double nis = zDiff.transpose() * S_pred.inverse() * zDiff;
 
-    printf("laser NIS:\t %02.5f\n", nis);
+//    printf("laser NIS:\t %02.5f\n", nis);
     return nis;
 }
 
 void UKF::CalculateNisConsistency()
 {
-    printf("radar NIS:\n");
+    //printf("radar NIS:\n");
     CalculateNisConsistencyFromMeasurements(radar_nis_threshold, radarNisValues_);
 
-    printf("laser NIS:\n");
+    //printf("laser NIS:\n");
     CalculateNisConsistencyFromMeasurements(laser_nis_threshold, laserNisValues_);
 }
 
@@ -607,8 +607,8 @@ double CalculateNisConsistencyFromMeasurements(const double nisThreshold, const 
     }
     const double fraction = (double)aboveThreshold / (double)nisValues.size();
 
-    printf("CalculateNisConsistency: %i of %lu measurements are above %.3f -> fraction=%.3f\n",
-        aboveThreshold, nisValues.size(), nisThreshold, fraction);
+    //printf("CalculateNisConsistency: %i of %lu measurements are above %.3f -> fraction=%.3f\n",
+    //    aboveThreshold, nisValues.size(), nisThreshold, fraction);
 
     return fraction;
 }

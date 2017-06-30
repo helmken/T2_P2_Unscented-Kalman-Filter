@@ -39,7 +39,6 @@ int main_forSimulator()
 
     // Create a UKF instance
     UKF ukf;
-
     // used to compute the RMSE later
     Tools tools;
     vector<VectorXd> estimations;
@@ -129,7 +128,8 @@ int main_forSimulator()
                     gt_values(3) = vy_gt;
                     ground_truth.push_back(gt_values);
 
-                    //Call ProcessMeasurment(meas_package) for Kalman filter
+                    
+					//Call ProcessMeasurment(meas_package) for Kalman filter
                     ukf.ProcessMeasurement(meas_package);
 
                     //Push the current estimated x,y positon from the Kalman filter's state vector
@@ -273,11 +273,21 @@ void check_files(
     }
 }
 
-void readInputFile(
-    ifstream& in_file_,
-    vector<MeasurementPackage>& measurement_pack_list)
+void ReadInputFile(
+    std::ifstream& in_file_,
+    vector<MeasurementPackage>& measurement_pack_list,
+    vector<VectorXd>& groundTruthValues)
 {
-    string line;
+    // The data file information is provided by the simulator and is the same
+    // data files from EKF. Again each line in the data file represents either
+    // a lidar or radar measurement marked by "L" or "R" on the starting
+    // line. The next columns are either 
+    // - the two lidar position measurements(x, y) or 
+    // - the three radar position measurements (rho, phi, rho_dot).
+    // Then comes the time stamp and finally the ground truth values
+    // for x, y, vx, vy, yaw, yawrate.
+
+    std::string line;
 
     // prep the measurement packages (each line represents a measurement at a
     // timestamp)
@@ -287,6 +297,10 @@ void readInputFile(
         MeasurementPackage meas_package;
         istringstream iss(line);
         long long timestamp;
+
+        // ground truth: timestamp, x, y, vx, vy, yaw, yawrate
+        const int groundTruthDim(7);
+        VectorXd groundTruth(groundTruthDim);
 
         // reads first element from the current line
         iss >> sensor_type;
@@ -305,6 +319,7 @@ void readInputFile(
             iss >> timestamp;
             meas_package.timestamp_ = timestamp;
             measurement_pack_list.push_back(meas_package);
+            groundTruth[0] = timestamp;
         }
         else if (sensor_type.compare("R") == 0)
         {
@@ -323,11 +338,18 @@ void readInputFile(
             iss >> timestamp;
             meas_package.timestamp_ = timestamp;
             measurement_pack_list.push_back(meas_package);
+            groundTruth[0] = timestamp;
         }
+
+        for (int i(1); i < groundTruthDim; ++i)
+        {
+            iss >> groundTruth[i];
+        }
+
+        groundTruthValues.push_back(groundTruth);
     }
 }
 
-//int main(int argc, char* argv[])
 int main_forDataFile(int argc, char* argv[])
 {
     check_arguments(argc, argv);
@@ -342,16 +364,15 @@ int main_forDataFile(int argc, char* argv[])
 
     vector<MeasurementPackage> measurement_pack_list;
 
-    readInputFile(in_file_, measurement_pack_list);
+    vector<VectorXd> groundTruthValues;
+    ReadInputFile(in_file_, measurement_pack_list, groundTruthValues);
 
     // create UKF instance    
     UKF ukf;
 
     // used to compute the RMSE later
     vector<VectorXd> estimations;
-    vector<VectorXd> ground_truth;
 
-    //Call the EKF-based fusion
     size_t N = measurement_pack_list.size();
     for (size_t k = 0; k < N; ++k)
     {
@@ -397,11 +418,39 @@ int main_forDataFile(int argc, char* argv[])
 
     ukf.CalculateNisConsistency();
 
+    // For the new data set, your algorithm will be run against
+    // "obj_pose-laser-radar-synthetic-input.txt". We'll collect the
+    // positions that your algorithm outputs and compare them to ground truth
+    // data. Your px, py, vx, and vy RMSE should be less than or equal to the
+    // values [.09, .10, .40, .30].
+    // ground truth: x, y, vx, vy, yaw, yawrate
+    //VectorXd stdDev = CalcStandardDeviation(groundTruthValues);
+    //printf("standard deviation: x=%.04f, y=%.04f, vx=%.04f, vy=%.04f, yaw=%.04f, yawrate=%.04f\n",
+    //    stdDev[0], stdDev[1], stdDev[2], stdDev[3], stdDev[4], stdDev[5]);
+    // output: standard deviation: x=15.1906, y=9.1098, vx=3.7333, vy=3.2904, yaw=1.5474, yawrate=0.3889
+
+    double stdAcc(0);
+    double minAcc(0);
+    double maxAcc(0);
+    double stdYawRate(0);
+    double minYawRate(0);
+    double maxYawRate(0);
+    CalcStandardDeviation(groundTruthValues, 
+        stdAcc, minAcc, maxAcc,
+        stdYawRate, minYawRate, maxYawRate);
+    printf( "stdAcc=%.5f, minAcc=%.5f, maxAcc=%.5f, "
+            "stdYawRate=%.5f, minYawRate=%.5f, maxYawRate=%.5f\n", 
+        stdAcc, minAcc, maxAcc,
+        stdYawRate, minYawRate, maxYawRate);
+
+    //VectorXd rmse = CalculateRMSE(estimations, groundTruthValues);
+    //cout << "rmse= " << rmse << "\n";
+
     return 0;
 }
 
 int main(int argc, char* argv[])
 {
-    //main_forDataFile(argc, argv);
-    main_forSimulator();
+    main_forDataFile(argc, argv);
+    //main_forSimulator();
 }

@@ -1,12 +1,13 @@
 #ifndef TOOLS_H_
 #define TOOLS_H_
+
 #include <vector>
 #include "Eigen/Dense"
+#include "measurement_package.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using namespace std;
-
 
 const double rad2deg(180.0 / M_PI);
 
@@ -42,5 +43,12 @@ Eigen::VectorXd Polar2Cartesian(
 
 double NormalizeAngle(double radian);
 
+VectorXd ReadGroundTruth(std::istringstream& iss);
+
+VectorXd CalcStandardDeviation(const std::vector<VectorXd> measurements);
+
+void CalcStandardDeviation(const std::vector<VectorXd> groundTruthValues,
+    double& stdAcc, double& minAcc, double& maxAcc,
+    double& stdYawRate, double& minYawRate, double& maxYawRate);
 
 #endif /* TOOLS_H_ */
