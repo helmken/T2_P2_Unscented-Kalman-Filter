@@ -451,6 +451,6 @@ int main_forDataFile(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    main_forDataFile(argc, argv);
-    //main_forSimulator();
+    //main_forDataFile(argc, argv);
+    main_forSimulator();
 }
