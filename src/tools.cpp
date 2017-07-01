@@ -163,6 +163,8 @@ void CalcStandardDeviation(
     double& stdAcc, double& minAcc, double& maxAcc,
     double& stdYawRate, double& minYawRate, double& maxYawRate)
 {
+    // ground truth : x, y, vx, vy, yaw, yawrate
+
     minAcc = std::numeric_limits<double>::max();
     maxAcc = std::numeric_limits<double>::min();
 

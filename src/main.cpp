@@ -63,7 +63,6 @@ int main_forSimulator()
 
         if (length && length > 2 && data[0] == '4' && data[1] == '2')
         {
-
             auto s = hasData(std::string(data));
             if (s != "") 
             {
@@ -113,19 +112,15 @@ int main_forSimulator()
                         iss >> timestamp;
                         meas_package.timestamp_ = timestamp;
                     }
-                    float x_gt;
-                    float y_gt;
-                    float vx_gt;
-                    float vy_gt;
-                    iss >> x_gt;
-                    iss >> y_gt;
-                    iss >> vx_gt;
-                    iss >> vy_gt;
-                    VectorXd gt_values(4);
-                    gt_values(0) = x_gt;
-                    gt_values(1) = y_gt;
-                    gt_values(2) = vx_gt;
-                    gt_values(3) = vy_gt;
+
+                    const int groundTruthDim(4);
+
+                    VectorXd gt_values(groundTruthDim);
+                    for (int i(0); i < groundTruthDim; ++i)
+                    {
+                        iss >> gt_values[i];
+                    }
+
                     ground_truth.push_back(gt_values);
 
                     
@@ -442,6 +437,10 @@ int main_forDataFile(int argc, char* argv[])
             "stdYawRate=%.5f, minYawRate=%.5f, maxYawRate=%.5f\n", 
         stdAcc, minAcc, maxAcc,
         stdYawRate, minYawRate, maxYawRate);
+    
+    // output: 
+    // stdAcc=0.07116, minAcc=-0.10053, maxAcc=0.10054, 
+    // stdYawRate=0.38891, minYawRate=-0.55000, maxYawRate=0.55000
 
     //VectorXd rmse = CalculateRMSE(estimations, groundTruthValues);
     //cout << "rmse= " << rmse << "\n";
