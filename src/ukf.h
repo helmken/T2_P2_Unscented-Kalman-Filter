@@ -39,7 +39,8 @@ const double std_yaw_dot(0.38891); // 0.9
 // Please, tweak these two values to obtain the required RMSE values.Another way could 
 // be to look at the "obj_pose-laser-radar-synthetic-input.txt" dataset and try to 
 // estimate the standard deviations for both accelerations.
-
+// Your px, py, vx, and vy RMSE should be less than or equal to the
+// values [.09, .10, .40, .30].
 
 // Laser measurement noise standard deviation position1 in m
 const double std_laser_px(0.15);

@@ -172,6 +172,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
             z, x_, P_);
 
         radarNisValues_.push_back(CalculateRadarNIS(z, z_pred, S_pred));
+
+        //printf("radar NIS: ");
         CalculateNisConsistencyFromMeasurements(radar_nis_threshold, radarNisValues_);
 
         previous_timestamp_ = meas_package.timestamp_;
@@ -203,6 +205,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package)
             z, x_, P_);
 
         laserNisValues_.push_back(CalculateLaserNIS(z, z_pred, S_pred));
+
+        //printf("laser NIS: ");
         CalculateNisConsistencyFromMeasurements(laser_nis_threshold, laserNisValues_);
 
         previous_timestamp_ = meas_package.timestamp_;
@@ -582,10 +586,10 @@ double CalculateLaserNIS(const VectorXd& z, const VectorXd& z_pred, const Matrix
 
 void UKF::CalculateNisConsistency()
 {
-    //printf("radar NIS:\n");
+    printf("radar NIS:\n");
     CalculateNisConsistencyFromMeasurements(radar_nis_threshold, radarNisValues_);
 
-    //printf("laser NIS:\n");
+    printf("laser NIS:\n");
     CalculateNisConsistencyFromMeasurements(laser_nis_threshold, laserNisValues_);
 }
 
