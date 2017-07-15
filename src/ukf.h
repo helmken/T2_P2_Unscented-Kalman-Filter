@@ -19,7 +19,7 @@ const int x_dim(5);
 const int x_aug_dim(7);
 
 // Sigma point spreading parameter
-const int lambda(3 - x_aug_dim);
+const double lambda(3 - x_aug_dim);
 
 const int num_sigma_points(2 * x_aug_dim + 1);
 
@@ -30,17 +30,12 @@ const int radarMeas_dim(3);
 const int laserMeas_dim(2);
 
 // Process noise standard deviation longitudinal acceleration in m/s^2
-// TODO: adjust noise standard deviation longitudinal acceleration to a value for bicycles
-const double std_a(0.07116); //0.03084    0.07116    1.75
+const double std_a(0.5);
 
 // Process noise standard deviation yaw acceleration in rad/s^2
-// TODO: adjust noise standard deviation yaw acceleration to a value for bicycles
-const double std_yaw_dot(0.38891); // 0.9
-// Please, tweak these two values to obtain the required RMSE values.Another way could 
-// be to look at the "obj_pose-laser-radar-synthetic-input.txt" dataset and try to 
-// estimate the standard deviations for both accelerations.
-// Your px, py, vx, and vy RMSE should be less than or equal to the
-// values [.09, .10, .40, .30].
+const double std_yaw_dot(M_PI / 4.0);
+
+// rubric values: [.09, .10, .40, .30].
 
 // Laser measurement noise standard deviation position1 in m
 const double std_laser_px(0.15);
@@ -125,12 +120,12 @@ public:
     };
 
     /**
-     * calculate the percentage of NIS values for laser and radar that are
-     * higher than 7.8
+     * calculate the percentage of NIS values for laser and radar 
      */
     void CalculateNisConsistency();
 
 private:
+
     /**
      * Initialization with first measurement
      */

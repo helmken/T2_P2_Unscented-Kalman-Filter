@@ -21,8 +21,7 @@ VectorXd Tools::CalculateRMSE(
     const vector<VectorXd> &estimations,
     const vector<VectorXd> &ground_truth)
 {
-    VectorXd rmse(4);
-    rmse << 0, 0, 0, 0;
+    VectorXd rmse = VectorXd::Zero(4);
 
     // check the validity of the following inputs:
     //  * the estimation vector size should not be zero
@@ -83,29 +82,6 @@ double NormalizeAngle(double  phi)
     return atan2(sin(phi), cos(phi));
 }
 
-//double NormalizeAngle(double radian)
-//{
-//    if (radian >= -M_PI && radian <= M_PI)
-//    {
-//        return radian;
-//    }
-//
-//    double normalized(radian);
-//    while (normalized > M_PI)
-//    {
-//        normalized -= 2 * M_PI;
-//    }
-//
-//    while (normalized < -M_PI)
-//    {
-//        normalized += 2 * M_PI;
-//    }
-//
-//    //printf("normalizing angle %.5f to %.5f\n", radian * rad2deg, normalized * rad2deg);
-//    
-//    return normalized;
-//}
-
 VectorXd ReadGroundTruth(istringstream& iss)
 {
     const int groundTruthDim(6);
@@ -131,8 +107,7 @@ VectorXd CalcStandardDeviation(const std::vector<VectorXd> measurements)
     const VectorXd firstVec = measurements[0];
     const int measurementDim = firstVec.rows();
 
-    zeroVec = VectorXd(measurementDim);
-    zeroVec.fill(0.0);
+    zeroVec = VectorXd::Zero(measurementDim);
     
     const double measurementsCount(measurements.size());
 
