@@ -43,8 +43,6 @@ Eigen::VectorXd Polar2Cartesian(
 
 double NormalizeAngle(double radian);
 
-VectorXd ReadGroundTruth(std::istringstream& iss);
-
 VectorXd CalcStandardDeviation(const std::vector<VectorXd> measurements);
 
 void CalcStandardDeviation(const std::vector<VectorXd> groundTruthValues,

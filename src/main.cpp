@@ -30,10 +30,7 @@ std::string hasData(std::string s)
     return "";
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-// setup for simulator
-////////////////////////////////////////////////////////////////////////////////////////////////
-int main_forSimulator()
+int main(int argc, char* argv[])
 {
     uWS::Hub h;
 
@@ -44,17 +41,8 @@ int main_forSimulator()
     vector<VectorXd> estimations;
     vector<VectorXd> ground_truth;
 
-    // log values from simulator
-    string out_file_name("../simulator_values.txt");
-    ofstream output_file(out_file_name.c_str(), ofstream::out);
-    if (!output_file.is_open())
-    {
-        cerr << "Cannot open output file: " << out_file_name << endl;
-        exit(EXIT_FAILURE);
-    }
-
     h.onMessage(
-        [&ukf, &tools, &estimations, &ground_truth, &output_file]
+        [&ukf, &tools, &estimations, &ground_truth]
         (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) 
     {
         // "42" at the start of the message means there's a websocket message event.
@@ -75,8 +63,6 @@ int main_forSimulator()
                     // j[1] is the data JSON object
 
                     string sensor_measurment = j[1]["sensor_measurement"];
-
-                    output_file << sensor_measurment << std::endl;
 
                     MeasurementPackage meas_package;
                     istringstream iss(sensor_measurment);
@@ -208,248 +194,5 @@ int main_forSimulator()
     }
     h.run();
 
-    if (output_file.is_open())
-    {
-        output_file.close();
-    }
-
     return 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// setup for data file
-////////////////////////////////////////////////////////////////////////////////////////////////
-void check_arguments(int argc, char* argv[])
-{
-    string usage_instructions = "Usage instructions: ";
-    usage_instructions += argv[0];
-    usage_instructions += " path/to/input.txt output.txt";
-
-    bool has_valid_args = false;
-
-    // make sure the user has provided input and output files
-    if (argc == 1)
-    {
-        cerr << usage_instructions << endl;
-    }
-    else if (argc == 2)
-    {
-        cerr << "Please include an output file.\n" << usage_instructions << endl;
-    }
-    else if (argc == 3)
-    {
-        has_valid_args = true;
-    }
-    else if (argc > 3)
-    {
-        cerr << "Too many arguments.\n" << usage_instructions << endl;
-    }
-
-    if (!has_valid_args)
-    {
-        exit(EXIT_FAILURE);
-    }
-}
-
-void check_files(
-    ifstream& in_file, string& in_name,
-    ofstream& out_file, string& out_name)
-{
-    if (!in_file.is_open())
-    {
-        cerr << "Cannot open input file: " << in_name << endl;
-        exit(EXIT_FAILURE);
-    }
-
-    if (!out_file.is_open())
-    {
-        cerr << "Cannot open output file: " << out_name << endl;
-        exit(EXIT_FAILURE);
-    }
-}
-
-void ReadInputFile(
-    std::ifstream& in_file_,
-    vector<MeasurementPackage>& measurement_pack_list,
-    vector<VectorXd>& groundTruthValues)
-{
-    // The data file information is provided by the simulator and is the same
-    // data files from EKF. Again each line in the data file represents either
-    // a lidar or radar measurement marked by "L" or "R" on the starting
-    // line. The next columns are either 
-    // - the two lidar position measurements(x, y) or 
-    // - the three radar position measurements (rho, phi, rho_dot).
-    // Then comes the time stamp and finally the ground truth values
-    // for x, y, vx, vy, yaw, yawrate.
-
-    std::string line;
-
-    // prep the measurement packages (each line represents a measurement at a
-    // timestamp)
-    while (getline(in_file_, line))
-    {
-        string sensor_type;
-        MeasurementPackage meas_package;
-        istringstream iss(line);
-        long long timestamp;
-
-        // ground truth: timestamp, x, y, vx, vy, yaw, yawrate
-        const int groundTruthDim(7);
-        VectorXd groundTruth(groundTruthDim);
-
-        // reads first element from the current line
-        iss >> sensor_type;
-        if (sensor_type.compare("L") == 0)
-        {
-            // LASER MEASUREMENT
-
-            // read measurements at this timestamp
-            meas_package.sensor_type_ = MeasurementPackage::LASER;
-            meas_package.raw_measurements_ = VectorXd(2);
-            float x;
-            float y;
-            iss >> x;
-            iss >> y;
-            meas_package.raw_measurements_ << x, y;
-            iss >> timestamp;
-            meas_package.timestamp_ = timestamp;
-            measurement_pack_list.push_back(meas_package);
-            groundTruth[0] = timestamp;
-        }
-        else if (sensor_type.compare("R") == 0)
-        {
-            // RADAR MEASUREMENT
-
-            // read measurements at this timestamp
-            meas_package.sensor_type_ = MeasurementPackage::RADAR;
-            meas_package.raw_measurements_ = VectorXd(3);
-            float ro;
-            float phi;
-            float ro_dot;
-            iss >> ro;
-            iss >> phi;
-            iss >> ro_dot;
-            meas_package.raw_measurements_ << ro, phi, ro_dot;
-            iss >> timestamp;
-            meas_package.timestamp_ = timestamp;
-            measurement_pack_list.push_back(meas_package);
-            groundTruth[0] = timestamp;
-        }
-
-        for (int i(1); i < groundTruthDim; ++i)
-        {
-            iss >> groundTruth[i];
-        }
-
-        groundTruthValues.push_back(groundTruth);
-    }
-}
-
-int main_forDataFile(int argc, char* argv[])
-{
-    check_arguments(argc, argv);
-
-    string in_file_name_ = argv[1];
-    ifstream in_file_(in_file_name_.c_str(), ifstream::in);
-
-    string out_file_name_ = argv[2];
-    ofstream out_file_(out_file_name_.c_str(), ofstream::out);
-
-    check_files(in_file_, in_file_name_, out_file_, out_file_name_);
-
-    vector<MeasurementPackage> measurement_pack_list;
-
-    vector<VectorXd> groundTruthValues;
-    ReadInputFile(in_file_, measurement_pack_list, groundTruthValues);
-
-    // create UKF instance    
-    UKF ukf;
-
-    // used to compute the RMSE later
-    vector<VectorXd> estimations;
-
-    size_t N = measurement_pack_list.size();
-    for (size_t k = 0; k < N; ++k)
-    {
-        // start filtering from the second frame (the speed is unknown in the first frame)
-        ukf.ProcessMeasurement(measurement_pack_list[k]);
-
-        // output the estimation
-        VectorXd x = ukf.GetX();
-        out_file_ << x(0) << "\t";
-        out_file_ << x(1) << "\t";
-        out_file_ << x(2) << "\t";
-        out_file_ << x(3) << "\t";
-
-        // output the measurements
-        if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LASER)
-        {
-            // output the estimation
-            out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t";
-            out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t";
-        }
-        else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR)
-        {
-            // output the estimation in the cartesian coordinates
-            double ro = measurement_pack_list[k].raw_measurements_(0);
-            double phi = measurement_pack_list[k].raw_measurements_(1);
-            out_file_ << ro * cos(phi) << "\t"; // p1_meas
-            out_file_ << ro * sin(phi) << "\t"; // ps_meas
-        }
-
-        estimations.push_back(x);
-    }
-
-    // close files
-    if (out_file_.is_open())
-    {
-        out_file_.close();
-    }
-
-    if (in_file_.is_open())
-    {
-        in_file_.close();
-    }
-
-    ukf.CalculateNisConsistency();
-
-    // For the new data set, your algorithm will be run against
-    // "obj_pose-laser-radar-synthetic-input.txt". We'll collect the
-    // positions that your algorithm outputs and compare them to ground truth
-    // data. Your px, py, vx, and vy RMSE should be less than or equal to the
-    // values [.09, .10, .40, .30].
-    // ground truth: x, y, vx, vy, yaw, yawrate
-    //VectorXd stdDev = CalcStandardDeviation(groundTruthValues);
-    //printf("standard deviation: x=%.04f, y=%.04f, vx=%.04f, vy=%.04f, yaw=%.04f, yawrate=%.04f\n",
-    //    stdDev[0], stdDev[1], stdDev[2], stdDev[3], stdDev[4], stdDev[5]);
-    // output: standard deviation: x=15.1906, y=9.1098, vx=3.7333, vy=3.2904, yaw=1.5474, yawrate=0.3889
-
-    double stdAcc(0);
-    double minAcc(0);
-    double maxAcc(0);
-    double stdYawRate(0);
-    double minYawRate(0);
-    double maxYawRate(0);
-    CalcStandardDeviation(groundTruthValues, 
-        stdAcc, minAcc, maxAcc,
-        stdYawRate, minYawRate, maxYawRate);
-    printf( "stdAcc=%.5f, minAcc=%.5f, maxAcc=%.5f, "
-            "stdYawRate=%.5f, minYawRate=%.5f, maxYawRate=%.5f\n", 
-        stdAcc, minAcc, maxAcc,
-        stdYawRate, minYawRate, maxYawRate);
-    
-    // output: 
-    // stdAcc=0.07116, minAcc=-0.10053, maxAcc=0.10054, 
-    // stdYawRate=0.38891, minYawRate=-0.55000, maxYawRate=0.55000
-
-    //VectorXd rmse = CalculateRMSE(estimations, groundTruthValues);
-    //cout << "rmse= " << rmse << "\n";
-
-    return 0;
-}
-
-int main(int argc, char* argv[])
-{
-    //main_forDataFile(argc, argv);
-    main_forSimulator();
 }

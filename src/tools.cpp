@@ -76,22 +76,9 @@ Eigen::VectorXd Polar2Cartesian(
     return result;
 }
 
-
 double NormalizeAngle(double  phi)
 {
     return atan2(sin(phi), cos(phi));
-}
-
-VectorXd ReadGroundTruth(istringstream& iss)
-{
-    const int groundTruthDim(6);
-    VectorXd groundTruth(groundTruthDim);
-    for (int i(0); i < groundTruthDim; ++i)
-    {
-        iss >> groundTruth[i];
-    }
-
-    return groundTruth;
 }
 
 VectorXd CalcStandardDeviation(const std::vector<VectorXd> measurements)

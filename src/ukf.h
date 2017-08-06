@@ -61,11 +61,7 @@ const double laser_nis_threshold(5.991);
 
 class UKF
 {
-
 private:
-    
-    int measurement_count_;
-
     // initially set to false, set to true in first call of ProcessMeasurement
     bool is_initialized_;
 
@@ -81,11 +77,14 @@ private:
     // state covariance matrix
     MatrixXd P_;
 
-    // measurement covariance noise R for radar measurements
+    // radar measurement noise
     MatrixXd R_radar_;
 
-    // measurement covariance noise R for laser measurements
+    // laser measurement noise
     MatrixXd R_laser_;
+
+    // matrix for mapping state into laser measurement space
+    MatrixXd H_laser_;
 
     // time when the state is true, in us
     long long previous_timestamp_;
@@ -153,9 +152,9 @@ private:
         MatrixXd& S_pred);
 
     void UpdateStateLaser(
-        const MatrixXd& predictedSigmaPoints, VectorXd& x_pred, MatrixXd& P_pred,
-        MatrixXd& predSigmaPointsInMeasSpace, VectorXd& z_pred, MatrixXd& S_pred,
-        VectorXd& z,
+        const VectorXd& x_pred, const MatrixXd& P_pred,
+        const VectorXd& z,
+        const MatrixXd& H, const MatrixXd& R,
         VectorXd& x_updated, MatrixXd& P_updated);
 };
 
